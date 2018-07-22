@@ -49,7 +49,7 @@ clf = tree.DecisionTreeClassifier()
 # output = open('run-' + str(datetime.datetime.now().strftime("%d-%m-%y-%H-%M-%S")) + '.txt', 'w')
 
 # # random data
-random_slice = np.random.choice(a = lal_data.shape[0],  size  =  80* len(lal_data)/100, replace = False)
+random_slice = np.random.choice(a = lal_data.shape[0],  size  =  40* len(lal_data)/100, replace = False)
 
 train_set = lal_data[random_slice,:]
 train_target = target[random_slice]
@@ -71,7 +71,7 @@ test_target = np.delete(target, random_slice)
 
 # print 'Before Semi'
 # output.write('Before Semi\n')
-sffs_model = sffs(0.0000000000000000000000000000001)
+sffs_model = sffs()
 
 SemiAccuracyArr = []
 SFFSAccuracyArr = []
@@ -82,8 +82,8 @@ DuplicateRatioArr = []
 clf.fit(train_set, train_target)
 beforeSemi = clf.score(test_set, test_target)
 
-sffs_model.loaddatafromarray(train_set, train_target, attr)
-accuracy, selected_feature =  sffs_model.sffs_predefine(clf, 50, 70, 5)
+sffs_model.loaddatafromarray(train_set, train_target, attr, test_set, test_target)
+accuracy, selected_feature =  sffs_model.sffs_predefine(clf, 50)
 
 SemiAccuracyArr.append(beforeSemi)
 NumOfEstimatorArr.append(0)
@@ -98,7 +98,7 @@ for num_of_estimators in range(2,ne):
 	bagging = BaggingClassifier(base_estimator = None, n_estimators = num_of_estimators, bootstrap = True)
 	fw = Framework(number_of_iter = 10 , algorithm = bagging, confident =  0.5,  verbose =  verbose)
 
-	fw.fit(train_set, unl_data, train_target, train_size = 250)
+	fw.fit(train_set, unl_data, train_target)
 
 	# print 'After Semi'
 	clf.fit(fw.extended_lal_data, fw.extended_data_target)
@@ -109,8 +109,8 @@ for num_of_estimators in range(2,ne):
 	NumOfEstimatorArr.append(num_of_estimators)
 	DuplicateRatioArr.append(fw.duplicate)
 	
-	sffs_model.loaddatafromarray(fw.extended_lal_data, fw.extended_data_target , attr)
-	accuracy, selected_feature =  sffs_model.sffs_predefine(clf, 50, 70, 5)
+	sffs_model.loaddatafromarray(fw.extended_lal_data, fw.extended_data_target , attr, test_set, test_target)
+	accuracy, selected_feature =  sffs_model.sffs_predefine(clf, 50)
 	SFFSAccuracyArr.append(accuracy)
 
 	# output.write(str(afterSemi) + ' ')
@@ -120,19 +120,22 @@ for num_of_estimators in range(2,ne):
 	# output.write(str(fw.duplicate) + ' ')
 	# output.write(str(fw.labelSum) + ' ')
 
-plt.subplot(211)
-plt.plot(NumOfEstimatorArr, SemiAccuracyArr)
+# plt.subplot(211)
+plt.plot(NumOfEstimatorArr, SemiAccuracyArr, label = "$Only Semi$")
 plt.xlabel('Number Of Estimators')
 plt.ylabel('Accuracy')
 
-plt.subplot(211)
-plt.plot(NumOfEstimatorArr, SFFSAccuracyArr , c = 'r')
+# plt.subplot(211)
+plt.plot(NumOfEstimatorArr, SFFSAccuracyArr , c = 'r', label = "$Semi with sffs$")
+# plt.subplot(211)
+plt.plot(np.arange(ne) , np.full(ne, beforeSemi), c = 'k', label = "$Before All$")
 
 
-plt.subplot(212)
-plt.plot(DuplicateRatioArr, SFFSAccuracyArr)
-plt.xlabel('Duplicate Ratio between classifiers')
-plt.ylabel('Accuracy')
+# plt.subplot(212)
+# plt.plot(DuplicateRatioArr, SFFSAccuracyArr)
+# plt.xlabel('Duplicate Ratio between classifiers')
+# plt.ylabel('Accuracy')
+plt.legend()
 plt.show()
 
 
