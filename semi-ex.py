@@ -81,7 +81,7 @@ fw.fit(lal_data,unl_data,target)
 # print "After semi accuracy: " +  str(afterSemi)
 
 sffs_model.loaddatafromarray(fw.extended_lal_data, fw.extended_data_target , attr, lal_data, target)
-accuracy, selected_feature =  sffs_model.sffs_predefine(25)
+accuracy, selected_feature =  sffs_model.sffs_predefine(15)
 
 np.save('./selectedFeatures', selected_feature)
 

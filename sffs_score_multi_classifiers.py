@@ -24,11 +24,9 @@ class sffs(object):
     def calculate_score(self, train, train_target, test, test_target):
         score = float(0)        
 
-        for classifier in self.__classifiers_list:
-            classifier = classifier.fit(train, train_target)
-            score += classifier.score(test, test_target)
+        self.__classifiers_list[0].fit(train, train_target)
+        score = self.__classifiers_list[0].score(test, test_target)
       
-        score /= len(self.__classifiers_list)
         return score
 
 
